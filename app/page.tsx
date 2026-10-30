@@ -19,8 +19,8 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
       <section className="text-center py-12">
-        <h1 className="text-4xl font-bold mb-4 text-gray-800">Welcome to My Portfolio</h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold mb-4 text-white">Welcome to My Portfolio</h1>
+        <p className="text-lg text-slate-300 max-w-2xl mx-auto">
           I am a software development student and full-stack developer building robust web applications with modern technologies like Next.js, React, and Node.js.
         </p>
       </section>

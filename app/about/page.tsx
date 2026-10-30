@@ -4,14 +4,14 @@ export default function About() {
     return (
         <div className="max-w-4xl mx-auto px-4 py-12">
             <section className="mb-12">
-                <h2 className="text-3xl font-bold mb-4 text-gray-800">About Me</h2>
-                <p className="text-lg text-gray-700 leading-relaxed mb-4">
+                <h2 className="text-3xl font-bold mb-4 text-white">About Me</h2>
+                <p className="text-lg text-slate-300 leading-relaxed mb-4">
                     I am a software development student at Brigham Young University-Idaho with a strong background in technical support, quality assurance auditing, and full-stack web engineering. My passion lies in building scalable web architectures and clean, responsive interfaces.
                 </p>
             </section>
 
             <section>
-                <h3 className="text-2xl font-bold mb-6 text-gray-800">Technical Expertise</h3>
+                <h3 className="text-2xl font-bold mb-6 text-white">Technical Expertise</h3>
                 <div className="grid gap-6 md:grid-cols-2">
                     <SkillCard
                         category="Frontend Development"
