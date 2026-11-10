@@ -14,8 +14,8 @@ export async function GET(
         return NextResponse.json({ error: 'Invalid project ID format' }, { status: 400 });
     }
 
-    // Fetch the project from in-memory database module
-    const project = getProjectById(id);
+    // Fetch the project from the database asynchronously
+    const project = await getProjectById(id);
 
     // Return 404 Not Found if the project doesn't exist
     if (!project) {
