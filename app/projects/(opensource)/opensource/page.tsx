@@ -1,8 +1,6 @@
 import { getProjects } from '@/lib/projects-db';
 
 export default async function OpenSourcePage() {
-    // Temporary artificial delay for testing full-page streaming (remove after testing)
-    await new Promise((res) => setTimeout(res, 2000));
 
     const projects = await getProjects('opensource');
 

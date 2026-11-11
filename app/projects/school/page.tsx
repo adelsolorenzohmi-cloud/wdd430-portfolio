@@ -8,7 +8,7 @@ async function SchoolProjectList() {
 
     return (
         <div className="grid gap-4">
-            {projects.map((project) => (
+            {schoolProjects.map((project) => (
                 <div key={project.id} className="p-4 border border-neutral-800 rounded-lg bg-neutral-900">
                     <h2 className="text-xl font-semibold text-white">{project.title}</h2>
                     <p className="text-neutral-300 text-sm mt-1">{project.description}</p>
