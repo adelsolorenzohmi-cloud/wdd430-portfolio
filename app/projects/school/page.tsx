@@ -1,28 +1,6 @@
 import { Suspense } from 'react';
-import { getProjects } from '@/lib/projects-db';
-
-async function SchoolProjectList() {
-    const projects = await getProjects();
-    // Filter for school projects if necessary, or display them
-    const schoolProjects = projects.filter((p) => p.type?.toLowerCase() === 'school');
-    return (
-        <div className="grid gap-4">
-            {schoolProjects.map((project) => (
-                <div key={project.id} className="p-4 border border-neutral-800 rounded-lg bg-neutral-900">
-                    <h2 className="text-xl font-semibold text-white">{project.title}</h2>
-                    <p className="text-neutral-300 text-sm mt-1">{project.description}</p>
-                    <div className="flex gap-2 mt-3 flex-wrap">
-                        {project.technologies.map((tech) => (
-                            <span key={tech} className="px-2 py-1 text-xs bg-neutral-800 text-indigo-300 rounded">
-                                {tech}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-}
+import SchoolProjectList from '@/app/ui/school-project-list';
+import ProjectCardSkeleton from '@/app/ui/skeletons';
 
 export default function SchoolProjectsPage() {
     return (
@@ -32,7 +10,7 @@ export default function SchoolProjectsPage() {
                 Explore academic coursework and software development assignments below.
             </p>
 
-            <Suspense fallback={<div className="text-neutral-400 text-sm py-4">Loading school projects...</div>}>
+            <Suspense fallback={<ProjectCardSkeleton />}>
                 <SchoolProjectList />
             </Suspense>
         </div>
