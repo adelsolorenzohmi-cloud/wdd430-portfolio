@@ -4,8 +4,7 @@ import { getProjects } from '@/lib/projects-db';
 async function SchoolProjectList() {
     const projects = await getProjects();
     // Filter for school projects if necessary, or display them
-    const schoolProjects = projects.filter((p) => p.category?.toLowerCase() === 'school' || p.type?.toLowerCase() === 'school');
-
+    const schoolProjects = projects.filter((p) => p.type?.toLowerCase() === 'school');
     return (
         <div className="grid gap-4">
             {schoolProjects.map((project) => (
