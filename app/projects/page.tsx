@@ -1,6 +1,8 @@
+import Link from 'next/link';
 import { fetchFilteredProjects, fetchProjectsPages } from '@/lib/projects-db';
 import { ProjectSearch } from '@/components/ProjectSearch';
 import Pagination from '@/components/Pagination';
+import DeleteProjectButton from '@/components/DeleteProjectButton';
 import { Suspense } from 'react';
 
 async function ProjectList({
@@ -21,15 +23,50 @@ async function ProjectList({
     return (
         <div className="grid gap-4">
             {projects.map((project) => (
-                <div key={project.id} className="p-4 border border-neutral-800 rounded-lg bg-neutral-900">
-                    <h2 className="text-xl font-semibold text-white">{project.title}</h2>
-                    <p className="text-neutral-300 text-sm mt-1">{project.description}</p>
-                    <div className="flex gap-2 mt-3 flex-wrap">
-                        {project.technologies?.map((tech) => (
-                            <span key={tech} className="px-2 py-1 text-xs bg-neutral-800 text-indigo-300 rounded">
-                                {tech}
+                <div
+                    key={project.id}
+                    className="p-4 border border-neutral-800 rounded-lg bg-neutral-900 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
+                >
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h2 className="text-xl font-semibold text-white">{project.title}</h2>
+                            <span className="px-2 py-0.5 text-xs rounded bg-neutral-800 text-neutral-300 capitalize">
+                                {project.type}
                             </span>
-                        ))}
+                        </div>
+                        <p className="text-neutral-300 text-sm mt-1">{project.description}</p>
+                        <div className="flex gap-2 mt-3 flex-wrap">
+                            {project.technologies?.map((tech) => (
+                                <span
+                                    key={tech}
+                                    className="px-2 py-1 text-xs bg-neutral-800 text-indigo-300 rounded"
+                                >
+                                    {tech}
+                                </span>
+                            ))}
+                        </div>
+                        {project.link && (
+                            <p className="mt-3">
+                                <a
+                                    href={project.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-indigo-400 hover:underline"
+                                >
+                                    View Repository / Live Demo →
+                                </a>
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                        <Link
+                            href={`/projects/${project.id}/edit`}
+                            className="px-3 py-1.5 rounded border border-neutral-700 text-neutral-200 text-xs font-medium hover:border-indigo-400 hover:text-indigo-300 transition"
+                        >
+                            Edit
+                        </Link>
+                        <DeleteProjectButton id={project.id} />
                     </div>
                 </div>
             ))}
@@ -54,16 +91,33 @@ export default function ProjectsPage(props: {
 }) {
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold tracking-tight mb-4 text-white">Projects Overview</h1>
-            <p className="text-neutral-400 text-sm mb-6">
-                Explore all open source contributions and academic coursework below.
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight mb-2 text-white">
+                        Projects Overview
+                    </h1>
+                    <p className="text-neutral-400 text-sm">
+                        Explore all open source contributions and academic coursework below.
+                    </p>
+                </div>
 
-            <Suspense fallback={<div className="text-neutral-400 text-sm mb-6">Loading search...</div>}>
+                <Link
+                    href="/projects/create"
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition shrink-0"
+                >
+                    + New Project
+                </Link>
+            </div>
+
+            <Suspense
+                fallback={<div className="text-neutral-400 text-sm mb-6">Loading search...</div>}
+            >
                 <ProjectSearch />
             </Suspense>
 
-            <Suspense fallback={<div className="text-neutral-400 text-sm py-4">Loading projects...</div>}>
+            <Suspense
+                fallback={<div className="text-neutral-400 text-sm py-4">Loading projects...</div>}
+            >
                 <ProjectList searchParamsPromise={props.searchParams} />
             </Suspense>
 
