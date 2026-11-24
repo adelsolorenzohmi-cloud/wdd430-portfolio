@@ -1,11 +1,22 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { getProjects } from '@/lib/projects-db';
 import ProjectCardSkeleton from '@/app/ui/skeletons';
 import DeleteProjectButton from '@/components/DeleteProjectButton';
+import { auth } from '@/auth';
+
+export const metadata: Metadata = {
+    title: 'Open Source',
+    description: 'Explore public repositories and community-driven open source projects.',
+};
 
 async function OpenSourceList() {
-    const projects = await getProjects('opensource');
+    const [projects, session] = await Promise.all([
+        getProjects('opensource'),
+        auth(),
+    ]);
+    const isAuthenticated = !!session?.user;
 
     if (projects.length === 0) {
         return (
@@ -37,15 +48,17 @@ async function OpenSourceList() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                        <Link
-                            href={`/projects/${project.id}/edit`}
-                            className="px-3 py-1.5 rounded border border-neutral-700 text-neutral-200 text-xs font-medium hover:border-indigo-400 hover:text-indigo-300 transition"
-                        >
-                            Edit
-                        </Link>
-                        <DeleteProjectButton id={project.id} />
-                    </div>
+                    {isAuthenticated && (
+                        <div className="flex items-center gap-2 shrink-0">
+                            <Link
+                                href={`/projects/${project.id}/edit`}
+                                className="px-3 py-1.5 rounded border border-neutral-700 text-neutral-200 text-xs font-medium hover:border-indigo-400 hover:text-indigo-300 transition"
+                            >
+                                Edit
+                            </Link>
+                            <DeleteProjectButton id={project.id} />
+                        </div>
+                    )}
                 </div>
             ))}
         </div>

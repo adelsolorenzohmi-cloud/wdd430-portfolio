@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { AuthError } from 'next-auth';
+import { auth, signIn } from '@/auth';
 
 const currentYear = new Date().getFullYear();
 
@@ -21,7 +23,7 @@ const ProjectFormSchema = z.object({
         .trim()
         .min(2, { message: 'Add at least one technology.' }),
     yearCompleted: z.coerce
-        .number({ invalid_type_error: 'Year completed must be a valid number.' })
+        .number({ message: 'Year completed must be a valid number.' })
         .int({ message: 'Year must be a whole number.' })
         .gte(2000, { message: 'Year must be 2000 or later.' })
         .lte(currentYear, { message: `Year cannot be greater than ${currentYear}.` }),
@@ -50,17 +52,65 @@ export type State = {
 
 export type ProjectFormState = State;
 
+export type LoginState = {
+    message?: string | null;
+};
+
+async function requireAuthenticatedUser() {
+    const session = await auth();
+    if (!session?.user) {
+        return null;
+    }
+    return session.user;
+}
+
 async function ensureYearCompletedColumn() {
     await sql`
-    ALTER TABLE projects
-    ADD COLUMN IF NOT EXISTS year_completed INTEGER
-  `;
+        ALTER TABLE projects
+        ADD COLUMN IF NOT EXISTS year_completed INTEGER
+    `;
+}
+
+export async function authenticate(
+    prevState: LoginState,
+    formData: FormData
+): Promise<LoginState> {
+    const rawEmail = formData.get('email');
+    const rawPassword = formData.get('password');
+    const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
+    const password = typeof rawPassword === 'string' ? rawPassword : '';
+
+    try {
+        await signIn('credentials', {
+            email,
+            password,
+            redirectTo: '/projects',
+        });
+        return { message: null };
+    } catch (error) {
+        if (error instanceof AuthError) {
+            switch (error.type) {
+                case 'CredentialsSignin':
+                    return { message: 'Invalid email or password.' };
+                default:
+                    return { message: 'Something went wrong while signing in.' };
+            }
+        }
+        throw error;
+    }
 }
 
 export async function createProject(
     prevState: State,
     formData: FormData
 ): Promise<State> {
+    const user = await requireAuthenticatedUser();
+    if (!user) {
+        return {
+            message: 'Unauthorized: You must be signed in to create a project.',
+        };
+    }
+
     const validatedFields = ProjectFormSchema.safeParse({
         title: formData.get('title'),
         description: formData.get('description'),
@@ -97,16 +147,16 @@ export async function createProject(
     try {
         await ensureYearCompletedColumn();
         await sql`
-      INSERT INTO projects (title, description, type, technologies, link, year_completed)
-      VALUES (
-        ${title},
-        ${description},
-        ${type},
-        ${technologiesArray as unknown as string},
-        ${cleanLink},
-        ${yearCompleted}
-      )
-    `;
+            INSERT INTO projects (title, description, type, technologies, link, year_completed)
+            VALUES (
+                ${title},
+                ${description},
+                ${type},
+                ${technologiesArray as unknown as string},
+                ${cleanLink},
+                ${yearCompleted}
+            )
+        `;
     } catch (error) {
         console.error('Database Error (createProject):', error);
         return {
@@ -125,6 +175,13 @@ export async function updateProject(
     prevState: State,
     formData: FormData
 ): Promise<State> {
+    const user = await requireAuthenticatedUser();
+    if (!user) {
+        return {
+            message: 'Unauthorized: You must be signed in to update a project.',
+        };
+    }
+
     const validatedFields = ProjectFormSchema.safeParse({
         title: formData.get('title'),
         description: formData.get('description'),
@@ -161,15 +218,15 @@ export async function updateProject(
     try {
         await ensureYearCompletedColumn();
         await sql`
-      UPDATE projects
-      SET title = ${title},
-          description = ${description},
-          type = ${type},
-          technologies = ${technologiesArray as unknown as string},
-          link = ${cleanLink},
-          year_completed = ${yearCompleted}
-      WHERE id = ${id}
-    `;
+            UPDATE projects
+            SET title = ${title},
+                description = ${description},
+                type = ${type},
+                technologies = ${technologiesArray as unknown as string},
+                link = ${cleanLink},
+                year_completed = ${yearCompleted}
+            WHERE id = ${id}
+        `;
     } catch (error) {
         console.error('Database Error (updateProject):', error);
         return {
@@ -184,6 +241,11 @@ export async function updateProject(
 }
 
 export async function deleteProject(id: number): Promise<void> {
+    const user = await requireAuthenticatedUser();
+    if (!user) {
+        throw new Error('Unauthorized: You must be signed in to delete a project.');
+    }
+
     try {
         await sql`DELETE FROM projects WHERE id = ${id}`;
     } catch (error) {

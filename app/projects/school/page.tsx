@@ -1,6 +1,12 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import SchoolProjectList from '@/app/ui/school-project-list';
 import ProjectCardSkeleton from '@/app/ui/skeletons';
+
+export const metadata: Metadata = {
+    title: 'School Projects',
+    description: 'Explore academic coursework and software development assignments.',
+};
 
 export default function SchoolProjectsPage() {
     return (

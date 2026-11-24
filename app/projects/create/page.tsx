@@ -14,7 +14,7 @@ export default function CreateProjectPage() {
         createProject,
         initialState
     );
-    const currentYear = new Date().getFullYear();
+    const maxYear = 2100;
 
     return (
         <div className="max-w-2xl mx-auto">
@@ -122,9 +122,9 @@ export default function CreateProjectPage() {
                         name="yearCompleted"
                         type="number"
                         min={2000}
-                        max={currentYear}
+                        max={maxYear}
                         required
-                        placeholder={`e.g., ${currentYear}`}
+                        placeholder={`e.g., ${maxYear}`}
                         aria-describedby="yearCompleted-error"
                         className="w-full px-3 py-2 rounded-lg border border-neutral-700 bg-neutral-950 text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
                     />

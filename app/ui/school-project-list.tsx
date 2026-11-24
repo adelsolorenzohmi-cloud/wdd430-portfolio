@@ -1,9 +1,14 @@
 import Link from 'next/link';
 import { getProjects } from '@/lib/projects-db';
 import DeleteProjectButton from '@/components/DeleteProjectButton';
+import { auth } from '@/auth';
 
 export default async function SchoolProjectList() {
-    const projects = await getProjects('school');
+    const [projects, session] = await Promise.all([
+        getProjects('school'),
+        auth(),
+    ]);
+    const isAuthenticated = !!session?.user;
 
     if (projects.length === 0) {
         return (
@@ -35,15 +40,17 @@ export default async function SchoolProjectList() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                        <Link
-                            href={`/projects/${project.id}/edit`}
-                            className="px-3 py-1.5 rounded border border-neutral-700 text-neutral-200 text-xs font-medium hover:border-indigo-400 hover:text-indigo-300 transition"
-                        >
-                            Edit
-                        </Link>
-                        <DeleteProjectButton id={project.id} />
-                    </div>
+                    {isAuthenticated && (
+                        <div className="flex items-center gap-2 shrink-0">
+                            <Link
+                                href={`/projects/${project.id}/edit`}
+                                className="px-3 py-1.5 rounded border border-neutral-700 text-neutral-200 text-xs font-medium hover:border-indigo-400 hover:text-indigo-300 transition"
+                            >
+                                Edit
+                            </Link>
+                            <DeleteProjectButton id={project.id} />
+                        </div>
+                    )}
                 </div>
             ))}
         </div>
